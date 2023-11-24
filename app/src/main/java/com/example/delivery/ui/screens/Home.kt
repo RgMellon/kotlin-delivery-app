@@ -11,9 +11,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import br.com.alura.aluvery.sampledata.sampleCandies
+import br.com.alura.aluvery.sampledata.sampleProducts
 import br.com.alura.aluvery.sampledata.sampleSections
 import com.example.delivery.model.Product
 import com.example.delivery.ui.components.CardProductItem
@@ -27,13 +33,48 @@ class HomeUiState(
     val searchedProducts: List<Product> = emptyList(),
     val onSearchChange: (String) -> Unit = {}
 ) {
-
-
-
     fun isShowSection(): Boolean {
         return searchText.isBlank()
     }
+}
 
+
+@Composable
+fun Home(products: List<Product>) {
+    val sections = mapOf(
+        "Todos os produtos" to products,
+        "Doces" to sampleCandies
+    )
+
+    var text  by remember {
+        mutableStateOf("")
+    }
+
+    fun containInNameOrDescription() = { product: Product ->
+        product.name.contains(text, ignoreCase = true) ||
+                product.description?.contains(text, ignoreCase = true) ?: false
+    }
+
+    val searchedProducts =  remember(text, products) {
+        if (text.isNotBlank()) {
+            sampleProducts.filter(containInNameOrDescription()) + products.filter(containInNameOrDescription())
+        } else {
+            emptyList()
+        }
+    }
+
+    val state =  remember(products, text) {
+        HomeUiState(
+            sections = sections,
+            searchedProducts = searchedProducts,
+            searchText = text,
+            onSearchChange = {
+                text = it
+            }
+        )
+    }
+
+    Home(state = state)
 
 }
 

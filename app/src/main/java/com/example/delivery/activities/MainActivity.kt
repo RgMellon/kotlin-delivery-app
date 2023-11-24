@@ -14,17 +14,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import br.com.alura.aluvery.sampledata.sampleCandies
 import br.com.alura.aluvery.sampledata.sampleProducts
 import br.com.alura.aluvery.sampledata.sampleSections
 import com.example.delivery.dao.ProductDao
-import com.example.delivery.model.Product
 import com.example.delivery.ui.screens.Home
 import com.example.delivery.ui.screens.HomeUiState
 import com.example.delivery.ui.theme.DeliveryTheme
@@ -38,44 +32,8 @@ class MainActivity : ComponentActivity() {
             App(onFabClick = {
                 startActivity(Intent(this, FormProductActivity::class.java))
             }) {
-
                 val products =  dao.products()
-                val sections = mapOf(
-                    "Todos os produtos" to products,
-                    "Doces" to sampleCandies
-                )
-
-                var text  by remember {
-                    mutableStateOf("")
-                }
-
-
-                fun containInNameOrDescription() = { product: Product ->
-                    product.name.contains(text, ignoreCase = true) ||
-                            product.description?.contains(text, ignoreCase = true) ?: false
-                }
-
-                val searchedProducts =  remember(text, products) {
-                    if (text.isNotBlank()) {
-                        sampleProducts.filter(containInNameOrDescription()) + products.filter(containInNameOrDescription())
-                    } else {
-                        emptyList()
-                    }
-                }
-
-
-                val state =  remember(products, text) {
-                    HomeUiState(
-                        sections = sections,
-                        searchedProducts = searchedProducts,
-                        searchText = text,
-                        onSearchChange = {
-                            text = it
-                        }
-                    )
-                }
-
-                Home(state = state)
+                Home(products)
             }
         }
     }
