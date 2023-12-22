@@ -1,18 +1,19 @@
 package com.example.delivery.dao
 
-import androidx.compose.runtime.mutableStateListOf
 import com.example.delivery.model.Product
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class ProductDao {
     companion object {
-        private val products = mutableStateListOf<Product>()
+        private val products = MutableStateFlow<List<Product>>(emptyList())
     }
 
 
     //toList devolve uma copia da lista de produtos imutavel
-    fun products() = products.toList()
+    fun products() = products.asStateFlow()
 
     fun save(product:Product) {
-        products.add(product)
+        products.value = products.value + product
     }
 }

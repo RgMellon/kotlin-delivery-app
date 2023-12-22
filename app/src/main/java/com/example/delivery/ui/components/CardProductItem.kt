@@ -15,7 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -35,15 +35,17 @@ import java.math.BigDecimal
 fun CardProductItem(
     product: Product,
     modifier: Modifier = Modifier,
-    elevation: Dp = 4.dp
+    elevation: Dp = 4.dp,
+    isExpanded: Boolean = false
 ) {
-    var isExpanded by remember { mutableStateOf(true) }
+    var expanded by rememberSaveable { mutableStateOf(isExpanded) }
+
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         ),
         modifier = modifier.fillMaxWidth().heightIn(150.dp).clickable {
-            isExpanded = !isExpanded
+            expanded = !expanded
         }
     ) {
         Column {
@@ -76,7 +78,7 @@ fun CardProductItem(
                     text = product.description,
                     Modifier
                         .padding(16.dp),
-                    maxLines= if (isExpanded)  10 else 2
+                    maxLines= if (expanded)  10 else 2
                 )
             }
 
@@ -93,8 +95,9 @@ private fun CardProductItemPreview() {
                 product = Product(
                     name="Teste",
                     price = BigDecimal(999),
-                    description = LoremIpsum(50).values.first()
-                )
+                    description = LoremIpsum(50).values.first(),
+                ),
+                isExpanded = false
             )
         }
     }

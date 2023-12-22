@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,8 +21,9 @@ import br.com.alura.aluvery.sampledata.sampleProducts
 import br.com.alura.aluvery.sampledata.sampleSections
 import com.example.delivery.dao.ProductDao
 import com.example.delivery.ui.screens.Home
-import com.example.delivery.ui.screens.HomeUiState
+import com.example.delivery.ui.states.HomeUiState
 import com.example.delivery.ui.theme.DeliveryTheme
+import com.example.delivery.ui.viewmodels.HomeViewModel
 
 class MainActivity : ComponentActivity() {
     private  val dao = ProductDao()
@@ -32,8 +34,8 @@ class MainActivity : ComponentActivity() {
             App(onFabClick = {
                 startActivity(Intent(this, FormProductActivity::class.java))
             }) {
-                val products =  dao.products()
-                Home(products)
+                val viewModel by viewModels<HomeViewModel>()
+                Home(viewModel)
             }
         }
     }

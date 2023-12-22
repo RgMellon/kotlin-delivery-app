@@ -16,10 +16,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -31,93 +29,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.delivery.R
-import com.example.delivery.dao.ProductDao
-import com.example.delivery.model.Product
 import com.example.delivery.states.FormProductUiState
-import java.math.BigDecimal
-import java.text.DecimalFormat
+import com.example.delivery.ui.viewmodels.ProductFormScreenViewModel
 
 
 @Composable
-fun ProductFormScreen(goBack: () -> Unit = {}) {
-
-    var url by remember {
-        mutableStateOf("")
-    }
-
-    var name by remember {
-        mutableStateOf("")
-    }
-
-    var price by remember {
-        mutableStateOf("")
-    }
-
-    val formater = remember {
-        DecimalFormat("#.##")
-    }
-
-    var description by remember {
-        mutableStateOf("")
-    }
-
-    val formatedPrice = try {
-        BigDecimal(price)
-    } catch (e: NumberFormatException) {
-        BigDecimal.ZERO
-    }
-
-    fun onSaveClick() {
-        val product = Product(
-            name = name,
-            price = formatedPrice,
-            image = url,
-            description = description
-        )
-
-        val dao = ProductDao();
-        dao.save(product)
-        goBack()
-
-    }
-
-    val state = remember(name, url, price, description) {
-        FormProductUiState(
-            url,
-            name,
-            price,
-            description,
-            onSaveClick = { onSaveClick() },
-            onValueUrlChange = {
-                url = it
-            },
-            onValueNameChange = {
-                name = it
-            },
-            onValuePriceChange = {
-                try {
-                    price = formater.format(BigDecimal(it))
-                } catch (e: IllegalArgumentException) {
-                    if (it.isBlank()) {
-                        price = it;
-                    }
-                }
-            },
-            onValueDescriptionChange = {
-                description = it
-            }
-        )
-    }
-
-
-    ProductFormScreen(state = state)
+fun ProductFormScreen(
+    viewModel: ProductFormScreenViewModel,
+    onSaveClick: () -> Unit = {}
+) {
+    val state by viewModel.uiState.collectAsState()
+    ProductFormScreen(state = state, onSaveClick = {
+        viewModel.save()
+        onSaveClick()
+    })
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProductFormScreen(state: FormProductUiState) {
-
+fun ProductFormScreen(state: FormProductUiState, onSaveClick: () -> Unit = { }) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -166,7 +97,6 @@ fun ProductFormScreen(state: FormProductUiState) {
                 capitalization = KeyboardCapitalization.Sentences
             )
         )
-
         TextField(
             modifier = Modifier.fillMaxWidth(),
             value = state.price,
@@ -195,9 +125,10 @@ fun ProductFormScreen(state: FormProductUiState) {
             )
         )
 
-        Button(onClick = state.onSaveClick, Modifier.fillMaxWidth()) {
+        Button(onClick = onSaveClick, Modifier.fillMaxWidth()) {
             Text(text = "Salvar")
         }
+
         Spacer(modifier = Modifier)
     }
 }
@@ -206,5 +137,5 @@ fun ProductFormScreen(state: FormProductUiState) {
 @Preview
 @Composable
 fun ProductFormScreenPrev() {
-    ProductFormScreen(goBack = {})
+    ProductFormScreen(state = FormProductUiState())
 }
